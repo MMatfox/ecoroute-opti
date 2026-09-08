@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
+import { Crosshair, Layers, Navigation } from 'lucide-react';
 
 export default function LiveMap({
   trucks = [],
@@ -15,11 +16,41 @@ export default function LiveMap({
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const userInteractedRef = useRef(false);
+  const truckMarkersMapRef = useRef(new Map());
+
   const layersRef = useRef({
     markers: L.layerGroup(),
+    trucksLayer: L.layerGroup(),
     routes: L.layerGroup(),
     traffic: L.layerGroup(),
   });
+
+  // Calculate current full bounds of all active entities
+  const calculateAllBounds = useCallback(() => {
+    const bounds = L.latLngBounds();
+    if (depot?.lat && depot?.lng) bounds.extend([depot.lat, depot.lng]);
+    points.forEach((p) => {
+      if (p.lat && p.lng) bounds.extend([p.lat, p.lng]);
+    });
+    trucks.forEach((t) => {
+      if (t.lat && t.lng) bounds.extend([t.lat, t.lng]);
+    });
+    if (highlightCitizenPos?.lat && highlightCitizenPos?.lng) {
+      bounds.extend([highlightCitizenPos.lat, highlightCitizenPos.lng]);
+    }
+    return bounds;
+  }, [depot, points, trucks, highlightCitizenPos]);
+
+  // Handler to manually recenter and fit map view
+  const handleRecenterMap = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const bounds = calculateAllBounds();
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [45, 45], maxZoom: 15, animate: true });
+    }
+  }, [calculateAllBounds]);
 
   // Initialize Leaflet Map once
   useEffect(() => {
@@ -43,6 +74,19 @@ export default function LiveMap({
     layersRef.current.routes.addTo(map);
     layersRef.current.traffic.addTo(map);
     layersRef.current.markers.addTo(map);
+    layersRef.current.trucksLayer.addTo(map);
+
+    // Track user drag / zoom interactions to prevent resetting position
+    map.on('movestart', (e) => {
+      if (e.originalEvent) {
+        userInteractedRef.current = true;
+      }
+    });
+    map.on('zoomstart', (e) => {
+      if (e.originalEvent) {
+        userInteractedRef.current = true;
+      }
+    });
 
     mapInstanceRef.current = map;
 
@@ -52,7 +96,7 @@ export default function LiveMap({
     };
   }, []);
 
-  // Update Layers when data changes
+  // Update Static Layers (Traffic, Routes, Depot, Points, Citizen Pin)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -61,8 +105,6 @@ export default function LiveMap({
     markers.clearLayers();
     routeLayer.clearLayers();
     trafficLayer.clearLayers();
-
-    const bounds = L.latLngBounds();
 
     // 1. Render Traffic Zones
     trafficZones.forEach((zone) => {
@@ -135,11 +177,10 @@ export default function LiveMap({
         <div style="font-family: inherit; font-size: 13px;">
           <b style="color: #6366f1;">🏢 ${depot.name}</b><br/>
           <span style="color: #94a3b8;">${depot.address}</span><br/>
-          <span style="display: inline-block; margin-top: 4px; padding: 2px 6px; background: rgba(99,102,241,0.2); color: #818cf8; border-radius: 4px; font-size: 11px;">Điểm Xuất Phát & Bãi Đổ Rác (VRP Depot)</span>
+          <span style="display: inline-block; margin-top: 4px; padding: 2px 6px; background: rgba(99,102,241,0.2); color: #818cf8; border-radius: 4px; font-size: 11px;">Điểm Xuất Phát & Bãi Đổ Rác (EcoDepot Đà Nẵng)</span>
         </div>
       `);
       markers.addLayer(depotMarker);
-      bounds.extend([depot.lat, depot.lng]);
     }
 
     // 4. Render Collection Points (Citizens & Businesses)
@@ -192,7 +233,6 @@ export default function LiveMap({
       }
 
       markers.addLayer(marker);
-      bounds.extend([point.lat, point.lng]);
     });
 
     // 5. Highlight Specific Citizen Pin if provided
@@ -219,67 +259,96 @@ export default function LiveMap({
         </div>
       `);
       markers.addLayer(userMarker);
-      bounds.extend([highlightCitizenPos.lat, highlightCitizenPos.lng]);
     }
 
-    // 6. Render Trucks with live animation & pulses
+    // Perform initial fit bounds ONLY ONCE on mount if user hasn't moved the map
+    if (!mapInstanceRef.current._hasInitialFit) {
+      const allBounds = calculateAllBounds();
+      if (allBounds.isValid()) {
+        map.fitBounds(allBounds, { padding: [40, 40], maxZoom: 15 });
+        mapInstanceRef.current._hasInitialFit = true;
+      }
+    }
+  }, [points, depot, routes, trafficZones, selectedTruckId, highlightCitizenPos, onPointClick, calculateAllBounds]);
+
+  // Update Dynamic Truck Markers smoothly (without resetting zoom/pan or recreating all layers)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const trucksLayer = layersRef.current.trucksLayer;
+    const existingMap = truckMarkersMapRef.current;
+
     trucks.forEach((truck) => {
       if (!truck.lat || !truck.lng) return;
 
       const isSelected = selectedTruckId && truck.id === selectedTruckId;
       const isDelayed = truck.isDelayed;
 
-      const truckIcon = L.divIcon({
-        className: 'truck-marker',
-        html: `
-          <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-            <div style="position: absolute; width: 38px; height: 38px; border-radius: 50%; background: ${isDelayed ? 'rgba(239, 68, 68, 0.4)' : isSelected ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)'}; animation: marker-pulse 2s infinite;"></div>
-            <div style="background: ${isDelayed ? '#ef4444' : '#0284c7'}; color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.4); z-index: 5;">
-              🚛
+      if (existingMap.has(truck.id)) {
+        // Smoothly update existing marker position
+        const marker = existingMap.get(truck.id);
+        marker.setLatLng([truck.lat, truck.lng]);
+      } else {
+        // Create new marker
+        const truckIcon = L.divIcon({
+          className: 'truck-marker',
+          html: `
+            <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+              <div style="position: absolute; width: 38px; height: 38px; border-radius: 50%; background: ${isDelayed ? 'rgba(239, 68, 68, 0.4)' : isSelected ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)'}; animation: marker-pulse 2s infinite;"></div>
+              <div style="background: ${isDelayed ? '#ef4444' : '#0284c7'}; color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.4); z-index: 5;">
+                🚛
+              </div>
             </div>
-          </div>
-        `,
-        iconSize: [38, 38],
-        iconAnchor: [19, 19],
-      });
+          `,
+          iconSize: [38, 38],
+          iconAnchor: [19, 19],
+        });
 
-      const truckMarker = L.marker([truck.lat, truck.lng], { icon: truckIcon });
-      truckMarker.bindPopup(`
-        <div style="font-family: inherit; font-size: 13px; min-width: 200px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-            <b style="color: #0284c7; font-size: 14px;">🚛 ${truck.licensePlate}</b>
-            <span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: ${isDelayed ? '#fee2e2; color: #b91c1c' : '#dcfce7; color: #15803d'}">
-              ${isDelayed ? 'Bị Trễ Giờ' : 'Đang Thu Gom'}
-            </span>
+        const truckMarker = L.marker([truck.lat, truck.lng], { icon: truckIcon });
+        truckMarker.bindPopup(`
+          <div style="font-family: inherit; font-size: 13px; min-width: 200px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <b style="color: #0284c7; font-size: 14px;">🚛 ${truck.licensePlate}</b>
+              <span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: ${isDelayed ? '#fee2e2; color: #b91c1c' : '#dcfce7; color: #15803d'}">
+                ${isDelayed ? 'Bị Trễ Giờ' : 'Đang Thu Gom'}
+              </span>
+            </div>
+            <div style="color: #64748b; font-size: 12px;">Tài xế: <b>${truck.driverName}</b> (${truck.driverPhone})</div>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 6px 0;" />
+            <div>Tải trọng: <b>${truck.currentLoadKg} / ${truck.capacityKg} kg</b> (${Math.round((truck.currentLoadKg / truck.capacityKg) * 100)}%)</div>
+            <div>Vận tốc: <b>${truck.speedKmH} km/h</b> | Nhiên liệu: <b>${truck.fuelLevel || 80}%</b></div>
+            <div style="margin-top: 4px; color: #0284c7;">Tiếp theo: <b>${truck.nextStopName || 'Trạm trung chuyển'}</b></div>
+            ${truck.etaToNextMins ? `<div style="font-size: 11px; color: #10b981;">ETA đến điểm kế: <b>~${truck.etaToNextMins} phút (${truck.distToNextKm} km)</b></div>` : ''}
+            ${isDelayed && truck.delayReason ? `<div style="margin-top: 4px; font-size: 11px; color: #ef4444; background: rgba(239,68,68,0.1); padding: 4px; border-radius: 4px;">⚠️ ${truck.delayReason}</div>` : ''}
           </div>
-          <div style="color: #64748b; font-size: 12px;">Tài xế: <b>${truck.driverName}</b> (${truck.driverPhone})</div>
-          <hr style="border-color: rgba(255,255,255,0.1); margin: 6px 0;" />
-          <div>Tải trọng: <b>${truck.currentLoadKg} / ${truck.capacityKg} kg</b> (${Math.round((truck.currentLoadKg / truck.capacityKg) * 100)}%)</div>
-          <div>Vận tốc: <b>${truck.speedKmH} km/h</b> | Nhiên liệu: <b>${truck.fuelLevel || 80}%</b></div>
-          <div style="margin-top: 4px; color: #0284c7;">Tiếp theo: <b>${truck.nextStopName || 'Trạm trung chuyển'}</b></div>
-          ${truck.etaToNextMins ? `<div style="font-size: 11px; color: #10b981;">ETA đến điểm kế: <b>~${truck.etaToNextMins} phút (${truck.distToNextKm} km)</b></div>` : ''}
-          ${isDelayed && truck.delayReason ? `<div style="margin-top: 4px; font-size: 11px; color: #ef4444; background: rgba(239,68,68,0.1); padding: 4px; border-radius: 4px;">⚠️ ${truck.delayReason}</div>` : ''}
-        </div>
-      `);
+        `);
 
-      if (onTruckClick) {
-        truckMarker.on('click', () => onTruckClick(truck));
+        if (onTruckClick) {
+          truckMarker.on('click', () => onTruckClick(truck));
+        }
+
+        trucksLayer.addLayer(truckMarker);
+        existingMap.set(truck.id, truckMarker);
       }
-
-      markers.addLayer(truckMarker);
-      bounds.extend([truck.lat, truck.lng]);
     });
-
-    // Auto fit bounds if points exist
-    if (bounds.isValid() && (!mapInstanceRef.current._hasInitialFit || selectedTruckId)) {
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-      mapInstanceRef.current._hasInitialFit = true;
-    }
-  }, [trucks, points, depot, routes, trafficZones, selectedTruckId, highlightCitizenPos]);
+  }, [trucks, selectedTruckId, onTruckClick]);
 
   return (
     <div className="relative rounded-xl overflow-hidden border border-slate-700/60 shadow-xl" style={{ height }}>
       <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
+
+      {/* Floating Recenter / Reset View Button (US8/US9 UX) */}
+      <div className="absolute top-3 right-3 z-[400] flex flex-col gap-2">
+        <button
+          onClick={handleRecenterMap}
+          className="px-3 py-2 rounded-xl bg-slate-900/90 backdrop-blur-md hover:bg-slate-800 text-slate-200 border border-slate-700/80 shadow-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+          title="Căn chỉnh và hiển thị toàn bộ bản đồ Đà Nẵng"
+        >
+          <Crosshair size={15} className="text-eco-400" />
+          <span>🎯 Căn Chỉnh Toàn Cảnh (Reset Zoom)</span>
+        </button>
+      </div>
 
       {/* Map Floating Legend */}
       <div className="absolute bottom-3 left-3 z-[400] bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-lg border border-slate-700/60 text-xs flex flex-wrap items-center gap-3 shadow-lg">
@@ -293,7 +362,7 @@ export default function LiveMap({
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded bg-indigo-500 inline-block"></span>
-          <span className="text-slate-200">Trạm EcoDepot</span>
+          <span className="text-slate-200">Trạm EcoDepot Đà Nẵng</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded bg-sky-500 inline-block"></span>
