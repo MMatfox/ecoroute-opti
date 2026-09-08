@@ -1,0 +1,21 @@
+{
+  "name": "ecoroute-opti",
+  "version": "1.0.0",
+  "description": "EcoRoute Opti - AI & VRP Waste Collection Optimization Platform",
+  "type": "module",
+  "main": "server/server.js",
+  "scripts": {
+    "server": "node --watch server/server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"node --watch server/server.js\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
