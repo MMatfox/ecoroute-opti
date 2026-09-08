@@ -51,8 +51,8 @@ fleetRouter.post('/trucks/:truckId/validity', (req, res) => {
 // Citizen Truck Tracking & Proximity Radar (US8)
 fleetRouter.get('/track-for-citizen', (req, res) => {
   const { lat, lng, requestId } = req.query;
-  const citizenLat = parseFloat(lat) || 10.772980;
-  const citizenLng = parseFloat(lng) || 106.699150;
+  const citizenLat = parseFloat(lat) || 16.0602;
+  const citizenLng = parseFloat(lng) || 108.2165;
 
   // Find the closest or assigned truck
   let closestTruck = null;

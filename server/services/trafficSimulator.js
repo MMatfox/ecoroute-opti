@@ -3,8 +3,8 @@ import { getDistanceKm } from './vrpEngine.js';
 class TrafficSimulator {
   constructor() {
     this.trafficZones = [
-      { id: 'zone_pasteur', name: 'Đường Pasteur (Quận 1 - Quận 3)', lat: 10.7810, lng: 106.6965, severity: 'MODERATE', delayMins: 15, radiusKm: 0.75 },
-      { id: 'zone_hangxanh', name: 'Ngã tư Hàng Xanh (Bình Thạnh)', lat: 10.8001, lng: 106.7118, severity: 'HEAVY', delayMins: 25, radiusKm: 1.0 }
+      { id: 'zone_dragonbridge', name: 'Cầu Rồng & Nút giao Nguyễn Văn Linh (Hải Châu)', lat: 16.0612, lng: 108.2215, severity: 'MODERATE', delayMins: 15, radiusKm: 0.65 },
+      { id: 'zone_dienbienphu', name: 'Ngã ba Huế & Hầm chui Điện Biên Phủ (Thanh Khê)', lat: 16.0645, lng: 108.1885, severity: 'HEAVY', delayMins: 25, radiusKm: 0.85 }
     ];
     this.simulationSpeed = 1; // multiplier
     this.isPaused = false;
@@ -17,9 +17,9 @@ class TrafficSimulator {
   addTrafficIncident(zone) {
     const newZone = {
       id: `zone_${Date.now()}`,
-      name: zone.name || 'Điểm ùn tắc phát sinh',
-      lat: zone.lat || 10.7780,
-      lng: zone.lng || 106.7000,
+      name: zone.name || 'Điểm ùn tắc phát sinh tại Đà Nẵng',
+      lat: zone.lat || 16.0650,
+      lng: zone.lng || 108.2200,
       severity: zone.severity || 'HEAVY',
       delayMins: zone.delayMins || 20,
       radiusKm: zone.radiusKm || 0.65

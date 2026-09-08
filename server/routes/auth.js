@@ -1,7 +1,7 @@
 import express from 'express';
 export const authRouter = express.Router();
 
-// Mock in-memory user registry
+// Mock in-memory user registry - Da Nang City
 let users = [
   {
     id: 'usr_admin',
@@ -10,7 +10,8 @@ let users = [
     role: 'ADMIN',
     name: 'Nguyễn Quản Trị (Dispatcher)',
     phone: '0901 000 001',
-    district: 'Quận 1',
+    district: 'Quận Hải Châu',
+    address: 'Trung tâm Điều hành EcoRoute Opti Đà Nẵng, Q. Hải Châu',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
   },
   {
@@ -21,7 +22,7 @@ let users = [
     name: 'Nguyễn Văn Hùng',
     phone: '0908 111 222',
     assignedTruckId: 'TRUCK-01',
-    district: 'Quận 1',
+    district: 'Quận Hải Châu',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
   },
   {
@@ -32,7 +33,7 @@ let users = [
     name: 'Trần Minh Đức',
     phone: '0909 333 444',
     assignedTruckId: 'TRUCK-02',
-    district: 'Quận 3',
+    district: 'Quận Sơn Trà',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'
   },
   {
@@ -42,23 +43,23 @@ let users = [
     role: 'RESIDENT',
     name: 'Lê Văn Phước (Hộ Dân Cư)',
     phone: '0934 567 890',
-    address: '88 Lê Lợi, P. Bến Thành, Quận 1',
-    district: 'Quận 1',
-    lat: 10.772980,
-    lng: 106.699150,
+    address: '88 Nguyễn Văn Linh, P. Nam Dương, Q. Hải Châu, Đà Nẵng',
+    district: 'Quận Hải Châu',
+    lat: 16.0602,
+    lng: 108.2165,
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
   },
   {
     id: 'usr_hotel_1',
-    username: 'hotel_rex',
+    username: 'hotel_novotel',
     password: '123',
     role: 'COMMERCIAL',
-    name: 'Khách sạn Rex Saigon',
+    name: 'Khách sạn Novotel Danang Premier',
     phone: '0901 234 567',
-    address: '141 Nguyễn Huệ, P. Bến Nghé, Quận 1',
-    district: 'Quận 1',
-    lat: 10.775844,
-    lng: 106.702417,
+    address: '36 Bạch Đằng, P. Thạch Thang, Q. Hải Châu, Đà Nẵng',
+    district: 'Quận Hải Châu',
+    lat: 16.0772,
+    lng: 108.2241,
     avatar: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=150'
   }
 ];
@@ -85,10 +86,10 @@ authRouter.post('/register', (req, res) => {
     role: role || 'RESIDENT',
     name: name || 'Người Dùng Mới',
     phone: phone || '0900 000 000',
-    address: address || '100 Lê Duẩn, Quận 1',
-    district: district || 'Quận 1',
-    lat: lat || 10.7760,
-    lng: lng || 106.7000
+    address: address || '120 Bạch Đằng, Q. Hải Châu, Đà Nẵng',
+    district: district || 'Quận Hải Châu',
+    lat: lat || 16.0650,
+    lng: lng || 108.2200
   };
   users.push(newUser);
   res.json({ success: true, user: newUser });

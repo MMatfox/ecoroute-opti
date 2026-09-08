@@ -224,7 +224,7 @@ export default function AuthModal({
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="VD: Lê Văn Phước / KS Rex Saigon"
+                  placeholder="VD: Lê Văn Phước / KS Novotel Danang"
                   className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-eco-500"
                 />
               </div>
@@ -249,11 +249,12 @@ export default function AuthModal({
                     onChange={(e) => setDistrict(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-eco-500"
                   >
-                    <option value="Quận 1">Quận 1</option>
-                    <option value="Quận 3">Quận 3</option>
-                    <option value="Quận 5">Quận 5</option>
-                    <option value="Quận Bình Thạnh">Quận Bình Thạnh</option>
-                    <option value="Quận 7">Quận 7</option>
+                    <option value="Quận Hải Châu">Quận Hải Châu</option>
+                    <option value="Quận Sơn Trà">Quận Sơn Trà</option>
+                    <option value="Quận Ngũ Hành Sơn">Quận Ngũ Hành Sơn</option>
+                    <option value="Quận Thanh Khê">Quận Thanh Khê</option>
+                    <option value="Quận Cẩm Lệ">Quận Cẩm Lệ</option>
+                    <option value="Quận Liên Chiểu">Quận Liên Chiểu</option>
                   </select>
                 </div>
               </div>
@@ -265,7 +266,7 @@ export default function AuthModal({
                   required
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="VD: 88 Lê Lợi, P. Bến Thành, Quận 1"
+                  placeholder="VD: 88 Nguyễn Văn Linh, P. Nam Dương, Q. Hải Châu, Đà Nẵng"
                   className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-eco-500"
                 />
               </div>

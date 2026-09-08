@@ -19,17 +19,17 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState('ADMIN'); // ADMIN, DRIVER, RESIDENT, COMMERCIAL
   const [activeAdminTab, setActiveAdminTab] = useState('OVERVIEW'); // OVERVIEW, WINDOW, VRP, ANALYTICS
 
-  // Auth User state (US1-US4)
+  // Auth User state (US1-US4) - Da Nang City
   const [currentUser, setCurrentUser] = useState({
     id: 'usr_admin',
     username: 'admin',
     role: 'ADMIN',
     name: 'Nguyễn Quản Trị (Dispatcher)',
     phone: '0901 000 001',
-    district: 'Quận 1',
-    address: 'Trụ sở Điều hành EcoRoute, Quận 1',
-    lat: 10.776889,
-    lng: 106.700806
+    district: 'Quận Hải Châu',
+    address: 'Trụ sở Điều hành EcoRoute Opti, Q. Hải Châu, Đà Nẵng',
+    lat: 16.0544,
+    lng: 108.2022
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('LOGIN');
@@ -118,8 +118,8 @@ export default function App() {
         role: 'ADMIN',
         name: 'Nguyễn Quản Trị (Dispatcher)',
         phone: '0901 000 001',
-        district: 'Quận 1',
-        address: 'Trung tâm Điều phối EcoRoute Opti'
+        district: 'Quận Hải Châu',
+        address: 'Trung tâm Điều phối EcoRoute Opti Đà Nẵng'
       });
     } else if (newRole === 'DRIVER') {
       setCurrentUser({
@@ -129,7 +129,7 @@ export default function App() {
         name: 'Nguyễn Văn Hùng',
         phone: '0908 111 222',
         assignedTruckId: 'TRUCK-01',
-        district: 'Quận 1'
+        district: 'Quận Hải Châu'
       });
       setSelectedTruckId('TRUCK-01');
     } else if (newRole === 'RESIDENT') {
@@ -139,22 +139,22 @@ export default function App() {
         role: 'RESIDENT',
         name: 'Lê Văn Phước (Hộ Dân Cư)',
         phone: '0934 567 890',
-        address: '88 Lê Lợi, P. Bến Thành, Quận 1',
-        district: 'Quận 1',
-        lat: 10.772980,
-        lng: 106.699150
+        address: '88 Nguyễn Văn Linh, P. Nam Dương, Q. Hải Châu, Đà Nẵng',
+        district: 'Quận Hải Châu',
+        lat: 16.0602,
+        lng: 108.2165
       });
     } else if (newRole === 'COMMERCIAL') {
       setCurrentUser({
         id: 'usr_hotel_1',
-        username: 'hotel_rex',
+        username: 'hotel_novotel',
         role: 'COMMERCIAL',
-        name: 'Khách sạn Rex Saigon',
+        name: 'Khách sạn Novotel Danang Premier',
         phone: '0901 234 567',
-        address: '141 Nguyễn Huệ, P. Bến Nghé, Quận 1',
-        district: 'Quận 1',
-        lat: 10.775844,
-        lng: 106.702417
+        address: '36 Bạch Đằng, P. Thạch Thang, Q. Hải Châu, Đà Nẵng',
+        district: 'Quận Hải Châu',
+        lat: 16.0772,
+        lng: 108.2241
       });
     }
   };
@@ -173,9 +173,9 @@ export default function App() {
 
   const handleInjectTraffic = async () => {
     const newIncident = {
-      name: `Ùn tắc phát sinh: Đường Lê Lợi (${new Date().toLocaleTimeString('vi-VN')})`,
-      lat: 10.7735 + (Math.random() * 0.005 - 0.0025),
-      lng: 106.7010 + (Math.random() * 0.005 - 0.0025),
+      name: `Ùn tắc phát sinh: Đường Bạch Đằng (${new Date().toLocaleTimeString('vi-VN')})`,
+      lat: 16.0700 + (Math.random() * 0.005 - 0.0025),
+      lng: 108.2235 + (Math.random() * 0.005 - 0.0025),
       severity: 'HEAVY',
       delayMins: 20
     };

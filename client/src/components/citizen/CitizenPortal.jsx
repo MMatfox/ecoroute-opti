@@ -16,7 +16,7 @@ export default function CitizenPortal({
   const [wasteAmountKg, setWasteAmountKg] = useState(existingRequest?.wasteAmountKg || 35);
   const [wasteType, setWasteType] = useState(existingRequest?.wasteType || 'GENERAL');
   const [preferredTime, setPreferredTime] = useState(existingRequest?.preferredTime || '10:00');
-  const [address, setAddress] = useState(currentUser?.address || '88 Lê Lợi, P. Bến Thành, Quận 1');
+  const [address, setAddress] = useState(currentUser?.address || '88 Nguyễn Văn Linh, P. Nam Dương, Q. Hải Châu, Đà Nẵng');
   const [phone, setPhone] = useState(currentUser?.phone || '0934 567 890');
   const [notes, setNotes] = useState(existingRequest?.notes || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,8 +36,8 @@ export default function CitizenPortal({
         type: currentUser?.role === 'COMMERCIAL' ? 'COMMERCIAL' : 'RESIDENTIAL',
         category: currentUser?.role === 'COMMERCIAL' ? 'HOTEL' : 'HOUSE',
         address,
-        lat: currentUser?.lat || 10.772980,
-        lng: currentUser?.lng || 106.699150,
+        lat: currentUser?.lat || 16.0602,
+        lng: currentUser?.lng || 108.2165,
         districtId: 'd1',
         wasteAmountKg: Number(wasteAmountKg),
         wasteType,

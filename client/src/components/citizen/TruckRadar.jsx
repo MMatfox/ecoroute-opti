@@ -15,8 +15,8 @@ export default function TruckRadar({ currentUser, currentLang }) {
 
     const fetchRadar = async () => {
       try {
-        const lat = currentUser?.lat || 10.772980;
-        const lng = currentUser?.lng || 106.699150;
+        const lat = currentUser?.lat || 16.0602;
+        const lng = currentUser?.lng || 108.2165;
         const res = await api.trackForCitizen(lat, lng, currentUser?.id);
         if (isMounted && res.success) {
           setRadarData(res);

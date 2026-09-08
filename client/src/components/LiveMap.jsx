@@ -25,10 +25,10 @@ export default function LiveMap({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    // Centered around Ho Chi Minh City District 1
+    // Centered around Da Nang City (Han River / Dragon Bridge)
     const map = L.map(mapContainerRef.current, {
-      center: [10.7765, 106.7000],
-      zoom: 14,
+      center: [16.0650, 108.2200],
+      zoom: 13.5,
       zoomControl: true,
     });
 
